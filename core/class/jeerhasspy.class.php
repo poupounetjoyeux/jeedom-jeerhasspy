@@ -1,204 +1,164 @@
 <?php
 
-/* This file is part of Jeedom.
- *
- * Jeedom is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Jeedom is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Jeedom. If not, see <http://www.gnu.org/licenses/>.
- */
+class jeerhasspy extends eqLogic
+{
 
-/* * ***************************Includes********************************* */
-require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
-require_once dirname(__FILE__) . '/rhasspy.utils.class.php';
-require_once dirname(__FILE__) . '/jeerhasspy_intent.class.php';
-
-class jeerhasspy extends eqLogic {
     //rhasspy called endpoint forwarded by jeeAPI:
-    public static function event() {
-        RhasspyUtils::logger('__EVENT__: '.file_get_contents('php://input'));
+    public static function event()
+    {
+        JeerhasspyUtils::logger('__EVENT__: ' . file_get_contents('php://input'));
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $payload = json_decode(file_get_contents('php://input'), true);
 
             //wakeword received:
             if (isset($payload['modelId']) && !isset($payload['intent'])) {
-                if (config::byKey('setWakeVariables', 'jeerhasspy') == '1') {
+                if (JeerhasspyUtils::getConfig(jeerhasspy_config_setWakeVariables) == '1') {
                     $siteId = explode(',', $payload['siteId'])[0];
                     scenario::setData('rhasspyWakeWord', $payload['modelId']);
                     scenario::setData('rhasspyWakeSiteId', $siteId);
-                    RhasspyUtils::logger('--Awake -> set variables: rhasspyWakeWord->'.$payload['modelId'].' | rhasspyWakeSiteId->'.$siteId);
+                    JeerhasspyUtils::logger('--Awake -> set variables: rhasspyWakeWord->' . $payload['modelId'] . ' | rhasspyWakeSiteId->' . $siteId);
                 }
                 return;
             }
 
             $_answerToRhasspy = array('speech' => array('text' => ''));
-            $speakDefault = false;
 
             //intent received:
             if (isset($payload['intent']) && isset($payload['intent']['name'])) {
                 $intentName = $payload['intent']['name'];
                 $payload['site_id'] = explode(',', $payload['site_id'])[0];
+                $assistant = JeerhasspyAssistant::bySiteId($payload['site_id']);
+                if($assistant === null)
+                {
+                    JeerhasspyUtils::logger('No assistant matching with site ID : '.$payload['site_id']);
+                    return;
+                }
+                $payload['eqName'] = $assistant->getName();
 
                 if ($intentName != '') {
-                    RhasspyUtils::logger('--Intent Recognized: '.$payload['text'].' --> '.json_encode($payload['intent']));
-
-                    $jrIntent = jeerhasspy_intent::byName($intentName);
-                    if (is_object($jrIntent) && $jrIntent->getIsEnable() == 1) {
-                        //interact
-                        if ($jrIntent->getIsInteract()) {
-                            RhasspyUtils::logger('--Send query to interact engine!');
-                            $reply = interactQuery::tryToReply($payload['text']);
-                            if (trim($reply['reply']) != '') {
-                                $_options = array();
-                                $_options['title'] = $payload['site_id'];
-                                $_options['message'] = $reply['reply'];
-                                RhasspyUtils::textToSpeech($_options);
-                            }
-                            return;
+                    JeerhasspyUtils::logger('--Intent Recognized: ' . $payload['text'] . ' --> ' . json_encode($payload['intent']));
+                    $interactionsIntentName = JeerhasspyUtils::getInteractionsIntentNameOrDefault();
+                    $askAnswerIntentName = JeerhasspyUtils::getAskAnswerIntentNameOrDefault();
+                    if ($interactionsIntentName === $intentName) {
+                        JeerhasspyUtils::logger('--Send query to interact engine!');
+                        $reply = interactQuery::tryToReply($payload['text'], $payload);
+                        if (trim($reply['reply']) != '') {
+                            $_answerToRhasspy['speech']['text'] = $reply['reply'];
                         }
-
-                        //callback scenario
-                        $_exec = $jrIntent->exec_callback_scenario($payload);
-                        //no scenario executed, if no wakeword_id should be ask answer.
-                        if (!$_exec && $payload['wakeword_id'] != null) {
-                            $speakDefault = true;
-                        } else {
-                            RhasspyUtils::playFinished($payload['site_id']);
-                        }
-                    } else {
-                        $speakDefault = true;
+                    } else if($askAnswerIntentName === $intentName) {
+                        JeerhasspyUtils::logger('--Ask answer intent, let ask request handle the answer');
                     }
-
-                    if ($speakDefault) $_answerToRhasspy['speech']['text'] = config::byKey('defaultTTS', 'jeerhasspy');
                 } else {
-                    RhasspyUtils::logger('--Unrecognized payload.');
+                    JeerhasspyUtils::logger('--Unrecognized payload.');
                 }
+
                 //always answer to rhasspy:
                 header('Content-Type: application/json');
                 echo json_encode($_answerToRhasspy);
-                return;
             }
         }
     }
 
     /*     * *********************Méthodes d'instance************************* */
-    public function preInsert() {}
-    public function postInsert() {}
-    public function preSave() {}
-    public function postSave() {}
-    public function preUpdate() {}
-    public function postUpdate() {}
-    public function preRemove() {}
-    public function postRemove() {}
+    public function preInsert()
+    {
+    }
 
-    /*     * **********************Getteur Setteur*************************** */
+    public function postInsert()
+    {
+    }
+
+    public function preSave()
+    {
+    }
+
+    public function postSave()
+    {
+    }
+
+    public function preUpdate()
+    {
+    }
+
+    public function postUpdate()
+    {
+    }
+
+    public function preRemove()
+    {
+    }
+
+    public function postRemove()
+    {
+    }
 }
 
-class jeerhasspyCmd extends cmd {
+class jeerhasspyCmd extends cmd
+{
 
     public function execute($options = array())
     {
-        $eqlogic = $this->getEqLogic();
-        RhasspyUtils::logger($eqlogic->getLogicalId().'.'.$this->getLogicalId().'() | '.json_encode($options));
-        switch ($this->getLogicalId()) {
-            case 'speak':
-                $this->speak($options);
+        $_assistant = new JeerhasspyAssistant($this->getEqLogic());
+        $_cmdName = $this->getLogicalId();
+        JeerhasspyUtils::logger($_assistant->getSiteId() . '.' . $_cmdName . '() | ' . json_encode($options));
+        switch ($_cmdName) {
+            case jeerhasspy_cmd_speak:
+                self::speak($_assistant, $options);
                 break;
-            case 'dynspeak':
-                $this->dynamicSpeak($options);
+            case jeerhasspy_cmd_dynamicSpeak:
+                self::dynamicSpeak($_assistant, $options);
                 break;
-            case 'ask':
-                $this->ask($options);
+            case jeerhasspy_cmd_ask:
+                self::ask($_assistant, $options);
                 break;
-            case 'ledOn':
-                $this->setLEDs(1);
+            case jeerhasspy_cmd_ledOn:
+                self::setLEDs($_assistant,1);
                 break;
-            case 'ledOff':
-                $this->setLEDs(0);
+            case jeerhasspy_cmd_ledOff:
+                self::setLEDs($_assistant,0);
                 break;
-            case 'setvol':
-                $this->setVolume($options);
+            case jeerhasspy_cmd_setVolume:
+                self::setVolume($_assistant, $options);
                 break;
-            case 'repeatTTS':
-                $this->repeatTTS($options);
+            case jeerhasspy_cmd_repeat:
+                self::repeatTTS($_assistant, $options);
                 break;
         }
     }
 
-    public function speak($options=array())
+    public function speak(JeerhasspyAssistant $_assistant, $options)
     {
-        $eqName = $this->getEqLogic()->getLogicalId();
-        $siteId = str_replace('TTS-', '', $eqName);
-        RhasspyUtils::logger(json_encode($options).' siteId: '.$siteId);
-        if ($options['title'] == '') {
-            $options['title'] = $siteId;
-        } elseif (substr($options['title'], 0, 1) == ':') {
-            $options['title'] = $siteId.$options['title'];
-        }
-        RhasspyUtils::textToSpeech($options);
+        RhasspyRequestsUtils::textToSpeech($_assistant, $options);
     }
 
-    public function dynamicSpeak($options=array())
+    public function dynamicSpeak(JeerhasspyAssistant $_assistant, $options)
     {
-        $eqName = $this->getEqLogic()->getLogicalId();
-        $siteId = str_replace('TTS-', '', $eqName);
-        RhasspyUtils::logger(json_encode($options).' siteId: '.$siteId);
-        if ($options['title'] == '') {
-            $options['title'] = $siteId;
-        } elseif (substr($options['title'], 0, 1) == ':') {
-            $options['title'] = $siteId.$options['title'];
-        }
-        $options['message'] = RhasspyUtils::evalDynamicString($options['message']);
-        RhasspyUtils::textToSpeech($options);
+        $options['message'] = JeerhasspyUtils::evalDynamicString($options['message']);
+        RhasspyRequestsUtils::textToSpeech($_assistant, $options);
     }
 
-    public function ask($options=array())
+    public function ask(JeerhasspyAssistant $_assistant, $options)
     {
-        $eqName = $this->getEqLogic()->getLogicalId();
-        $siteId = str_replace('TTS-', '', $eqName);
-        RhasspyUtils::logger(json_encode($options).' siteId: '.$siteId);
-
         $answer_entity = $options['answer'][0];
         $answer_variable = $options['variable'];
-        $options['title'] = $siteId;
-        RhasspyUtils::textToSpeech($options);
+        RhasspyRequestsUtils::textToSpeech($_assistant, $options);
 
-        $options['askData'] = $answer_entity.'::'.$answer_variable;
-        RhasspyUtils::speakToAsk($siteId, $options);
+        $options['askData'] = $answer_entity . '::' . $answer_variable;
+        RhasspyRequestsUtils::speakToAsk($_assistant, $options);
     }
 
-    public function setLEDs($state=1)
+    public function setLEDs(JeerhasspyAssistant $_assistant, $state)
     {
-        $eqName = $this->getEqLogic()->getLogicalId();
-        $siteId = str_replace('TTS-', '', $eqName);
-        RhasspyUtils::logger($state.' siteId: '.$siteId);
-
-        RhasspyUtils::setLEDs($state, $siteId);
+        RhasspyRequestsUtils::setLEDs($_assistant, $state);
     }
 
-    public function setVolume($options=array())
+    public function setVolume(JeerhasspyAssistant $_assistant, $options)
     {
-        $eqName = $this->getEqLogic()->getLogicalId();
-        $siteId = str_replace('TTS-', '', $eqName);
-        RhasspyUtils::logger(json_encode($options).' siteId: '.$siteId);
-
-        RhasspyUtils::setVolume($options['slider'], $siteId);
+        RhasspyRequestsUtils::setVolume($_assistant, $options['slider']);
     }
 
-    public function repeatTTS($options=array())
+    public function repeatTTS(JeerhasspyAssistant $_assistant)
     {
-        $eqName = $this->getEqLogic()->getLogicalId();
-        $siteId = str_replace('TTS-', '', $eqName);
-        RhasspyUtils::logger(json_encode($options).' siteId: '.$siteId);
-
-        RhasspyUtils::repeatTTS($siteId);
+        RhasspyRequestsUtils::repeatAssistant($_assistant);
     }
 }

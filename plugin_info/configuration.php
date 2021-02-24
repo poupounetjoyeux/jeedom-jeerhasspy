@@ -1,5 +1,7 @@
 <?php
-require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
+
+require_once dirname(__FILE__) . '/../core/utils/jeerhasspy.constants.config.php';
+
 include_file('core', 'authentification', 'php');
 if (!isConnect('admin')) {
     throw new Exception('{{401 - Accès non autorisé}}');
@@ -9,59 +11,37 @@ if (!isConnect('admin')) {
 <form class="form-horizontal">
     <fieldset>
         <div class="form-group">
-            <label class="col-lg-4 control-label" >{{Adresse du Rhasspy maître}}
-                <sup><i class="fas fa-question-circle" title="{{Adresse IP de votre Rhasspy (maître).}}"></i></sup>
+            <label class="col-lg-4 control-label">{{Nom de l'Intent des interactions}}
+                <sup><i class="fas fa-question-circle"
+                        title="{{Nom de l'Intent utilisé pour synchroniser les interactions Jeedom sur les équipements Rhasspy. L'Intent ne sera pas récupéré lors de l'import des assistant. JeedomInteractions par defaut}}"></i></sup>
             </label>
             <div class="col-lg-4">
-                <input class="configKey form-control" data-l1key="rhasspyAddr" placeholder="http://127.0.0.1"/>
+                <input class="configKey form-control"
+                       data-l1key="<?php echo jeerhasspy_config_interactionsIntentName ?>"
+                       placeholder="JeedomInteractions"/>
             </div>
         </div>
 
         <div class="form-group">
-            <label class="col-lg-4 control-label" >{{Port du Rhasspy maître}}
-                <sup><i class="fas fa-question-circle" title="{{Port de votre Rhasspy (maître). 12101 par defaut}}"></i></sup>
+            <label class="col-lg-4 control-label">{{Nom de l'Intent des réponses Ask}}
+                <sup><i class="fas fa-question-circle"
+                        title="{{Nom de l'Intent utilisé pour récupérer les réponses à la commande Ask de Jeedom sur les équipements Rhasspy. L'Intent ne sera pas récupéré lors de l'import des assistant. JeedomAskAnswers par defaut}}"></i></sup>
             </label>
             <div class="col-lg-4">
-                <input class="configKey form-control" data-l1key="rhasspyPort" placeholder="12101"/>
+                <input class="configKey form-control" data-l1key="<?php echo jeerhasspy_config_askAnswerIntentName ?>"
+                       placeholder="JeedomAskAnswers"/>
             </div>
         </div>
 
         <div class="form-group">
-            <label class="col-lg-4 control-label" >{{Feedback}}
-                <sup><i class="fas fa-question-circle" title="{{Réponse si aucune correspondance n'est trouvée.}}"></i></sup>
+            <label class="col-lg-4 control-label">{{Variables rhasspyWakeWord / rhasspyWakeSiteId}}
+                <sup><i class="fas fa-question-circle"
+                        title="{{Assigne ces deux variables avec le wakeId et le siteId ayant déclenché le wakeword.}}"></i></sup>
             </label>
             <div class="col-lg-4">
-                <textarea class="configKey form-control" data-l1key="defaultTTS" placeholder="{{Désolé mais je ne vois pas quoi faire.}}"></textarea>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="col-lg-4 control-label" >{{Filtrer les Intents Jeedom}}
-                <sup><i class="fas fa-question-circle" title="{{Importe seulement les Intents de l'assistant dont le nom finit par 'Jeedom'.}}"></i></sup>
-            </label>
-            <div class="col-lg-4">
-                <input type="checkbox" class="configKey" data-l1key="filterJeedomIntents" checked/>
-            </div>
-        </div>
-
-        <div class="form-group">
-            <label class="col-lg-4 control-label" >{{Variables rhasspyWakeWord / rhasspyWakeSiteId}}
-                <sup><i class="fas fa-question-circle" title="{{Assigne ces deux variables avec le wakeId et le siteId ayant déclenché le wakeword.}}"></i></sup>
-            </label>
-            <div class="col-lg-4">
-                <input type="checkbox" class="configKey" data-l1key="setWakeVariables" checked/>
+                <input type="checkbox" class="configKey" data-l1key="<?php jeerhasspy_config_setWakeVariables ?>"
+                       checked/>
             </div>
         </div>
     </fieldset>
 </form>
-
-<script type="text/javascript">
-$(function() {
-    setTimeout(function() {
-        defaultTTSarea = $('textarea[data-l1key="defaultTTS"]')
-        if (defaultTTSarea.val() == '') {
-            defaultTTSarea.val(defaultTTSarea.attr('placeholder'))
-        }
-    }, 500)
-})
-</script>
