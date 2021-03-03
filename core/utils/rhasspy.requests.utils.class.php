@@ -111,7 +111,7 @@ class RhasspyRequestsUtils
         //get either siteId/lang or get master one:
         $lang = $_assistant->getDefaultLang();
         $siteId = null;
-        if ($_assistant->isMaster() && $_options['title'] != '') {
+        if ($_assistant->isMaster() && isset($_options['title']) && $_options['title'] != '') {
             $_string = $_options['title'];
             if (strpos($_string, ':') !== false) {
                 $siteId = explode(':', $_string)[0];

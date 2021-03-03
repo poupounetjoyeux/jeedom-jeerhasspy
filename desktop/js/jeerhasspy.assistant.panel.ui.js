@@ -66,22 +66,12 @@ function deleteAssistantClick(_siteId) {
 }
 
 function speakTestClick(_siteId) {
-    $.hideAlert();
-    $.ajax({
-        type: "POST",
-        url: "plugins/jeerhasspy/core/ajax/jeerhasspy.ajax.php",
-        data: {
-            action: "test",
-            siteId: _siteId
+    testAssistant(_siteId, (_err) => {
+            $('#div_alert').showAlert({message: _err, level: 'danger'});
         },
-        dataType: 'json',
-        error: (request, status, error) => {
-            handleAjaxError(request, status, error);
-        },
-        success: () => {
+        () => {
             $('#div_alert').showAlert({message: '{{Test TTS envoyé}}', level: 'success'});
-        }
-    });
+        });
 }
 
 function openInterfaceClick(_uri) {

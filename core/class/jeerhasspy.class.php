@@ -97,7 +97,6 @@ class jeerhasspy extends eqLogic
 
 class jeerhasspyCmd extends cmd
 {
-
     public function execute($options = array())
     {
         $_assistant = new JeerhasspyAssistant($this->getEqLogic());

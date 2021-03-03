@@ -89,6 +89,29 @@ function deleteAssistant(_siteId, _callbackError, _callbackSuccess) {
     })
 }
 
+function testAssistant(_siteId, _callbackError, _callbackSuccess) {
+    $.hideAlert();
+    $.ajax({
+        type: "POST",
+        url: "plugins/jeerhasspy/core/ajax/jeerhasspy.ajax.php",
+        data: {
+            action: "testAssistant",
+            siteId: _siteId,
+        },
+        dataType: 'json',
+        error: (request, status, error) => {
+            handleAjaxError(request, status, error);
+        },
+        success: (data) => {
+            if (data.state != 'ok') {
+                _callbackError(data.result);
+                return;
+            }
+            _callbackSuccess();
+        }
+    })
+}
+
 function syncAssistants(_syncInformations, _syncInteractions, _syncAnswers, _syncSlots, _callbackError, _callbackSuccess) {
     $.hideAlert();
     $.ajax({
