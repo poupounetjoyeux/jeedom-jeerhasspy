@@ -4,6 +4,8 @@ require_once dirname(__FILE__) . '/jeerhasspy.desktop.inc.php';
 if (!isConnect('admin')) {
     throw new Exception('{{401 - Accès non autorisé}}');
 }
+
+sendVarToJS('eqType', jeerhasspy_id);
 ?>
 
 <div class="row row-overflow">

@@ -55,7 +55,7 @@ function checkAssistantAjaxMethods()
         $_syncInformations = JeerhasspyUtils::toBool(init('syncInformations', false));
         $_syncInteractions = JeerhasspyUtils::toBool(init('syncInteractions', false));
         $_syncAnswers = JeerhasspyUtils::toBool(init('syncAnswers', false));
-        $_syncSlots = JeerhasspyUtils::toBool(init('syncSlotss', false));
+        $_syncSlots = JeerhasspyUtils::toBool(init('syncSlots', false));
         $result = JeerhasspyAssistant::syncAllAssistants($_syncInformations, $_syncInteractions, $_syncAnswers, $_syncSlots);
         if (!$result->isSuccess()) {
             ajax::error($result->getMessage());

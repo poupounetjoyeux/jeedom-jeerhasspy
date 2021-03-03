@@ -9,7 +9,6 @@ require_once dirname(__FILE__) . '/../utils/jeerhasspy.utils.class.php';
 require_once dirname(__FILE__) . '/../class/jeerhasspy.class.php';
 require_once dirname(__FILE__) . '/../class/jeerhasspy.assistant.class.php';
 require_once dirname(__FILE__) . '/../class/jeerhasspy.interaction.class.php';
-require_once dirname(__FILE__) . '/../class/jeerhasspy.intent.class.php';
 require_once dirname(__FILE__) . '/../class/jeerhasspy.response.class.php';
 require_once dirname(__FILE__) . '/../class/jeerhasspy.slot.class.php';
 require_once dirname(__FILE__) . '/../class/jeerhasspy.answer.class.php';

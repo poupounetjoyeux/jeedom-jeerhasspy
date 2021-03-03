@@ -32,8 +32,8 @@ const jeerhasspy_sat_type = 'Satellite';
 
 const rhasspy_min_supported_version = '2.5.0';
 const rhasspy_unsupported_version = 'unsupported';
-const rhasspy_jeedom_sentences_file = 'intents/jeedom.ini';
-const rhasspy_jeedom_answers_sentences_file = 'intents/jeedomAnswers.ini';
+const rhasspy_jeedom_sentences_file = 'sentences.ini';
+const rhasspy_jeedom_answers_sentences_file = 'intents/answers.ini';
 
 const rhasspy_api = '/api';
 const rhasspy_api_hermes = rhasspy_api . '/mqtt/hermes';

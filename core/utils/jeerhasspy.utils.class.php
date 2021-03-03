@@ -51,7 +51,7 @@ class JeerhasspyUtils
 
         $answers = JeerhasspyAnswer::all();
 
-        $payload = "\n[" . $askAnswerIntentName . "]\n";
+        $payload = "[" . $askAnswerIntentName . "]\n";
         foreach ($answers as $answer) {
             if(!$answer->getIsSync())
             {

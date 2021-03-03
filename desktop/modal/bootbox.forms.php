@@ -63,9 +63,23 @@
             </div>
 
             <div class="form-group">
-                <label class="control-label col-sm-6">{{Envoyer les interactions et les slots Jeedom}}</label>
+                <label class="control-label col-sm-6">{{Envoyer les interactions Jeedom}}</label>
                 <div class="col-sm-6">
                     <input type="checkbox" class="form-control" name="syncInteractions" checked/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-sm-6">{{Envoyer les réponses}}</label>
+                <div class="col-sm-6">
+                    <input type="checkbox" class="form-control" name="syncAnswers" checked/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-sm-6">{{Envoyer les Slots}}</label>
+                <div class="col-sm-6">
+                    <input type="checkbox" class="form-control" name="syncSlots" checked/>
                 </div>
             </div>
         </form>
@@ -84,9 +98,23 @@
             </div>
 
             <div class="form-group">
-                <label class="control-label col-sm-6">{{Envoyer les interactions et les slots Jeedom}}</label>
+                <label class="control-label col-sm-6">{{Envoyer les interactions Jeedom}}</label>
                 <div class="col-sm-6">
                     <input type="checkbox" class="form-control" name="syncInteractions" checked/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-sm-6">{{Envoyer les réponses}}</label>
+                <div class="col-sm-6">
+                    <input type="checkbox" class="form-control" name="syncAnswers" checked/>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label class="control-label col-sm-6">{{Envoyer les Slots}}</label>
+                <div class="col-sm-6">
+                    <input type="checkbox" class="form-control" name="syncSlots" checked/>
                 </div>
             </div>
         </form>

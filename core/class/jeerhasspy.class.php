@@ -1,5 +1,7 @@
 <?php
 
+require_once dirname(__FILE__) . '/../php/jeerhasspy.inc.php';
+
 class jeerhasspy extends eqLogic
 {
 
@@ -21,7 +23,7 @@ class jeerhasspy extends eqLogic
                 return;
             }
 
-            $_answerToRhasspy = array('speech' => array('text' => ''));
+            $_answerToRhasspy = ['speech' => ['text' => '']];
 
             //intent received:
             if (isset($payload['intent']) && isset($payload['intent']['name'])) {
@@ -121,23 +123,23 @@ class jeerhasspyCmd extends cmd
                 self::setVolume($_assistant, $options);
                 break;
             case jeerhasspy_cmd_repeat:
-                self::repeatTTS($_assistant, $options);
+                self::repeatTTS($_assistant);
                 break;
         }
     }
 
-    public function speak(JeerhasspyAssistant $_assistant, $options)
+    protected function speak(JeerhasspyAssistant $_assistant, $options)
     {
         RhasspyRequestsUtils::textToSpeech($_assistant, $options);
     }
 
-    public function dynamicSpeak(JeerhasspyAssistant $_assistant, $options)
+    protected function dynamicSpeak(JeerhasspyAssistant $_assistant, $options)
     {
         $options['message'] = JeerhasspyUtils::evalDynamicString($options['message']);
         RhasspyRequestsUtils::textToSpeech($_assistant, $options);
     }
 
-    public function ask(JeerhasspyAssistant $_assistant, $options)
+    protected function ask(JeerhasspyAssistant $_assistant, $options)
     {
         $answer_entity = $options['answer'][0];
         $answer_variable = $options['variable'];
@@ -147,17 +149,17 @@ class jeerhasspyCmd extends cmd
         RhasspyRequestsUtils::speakToAsk($_assistant, $options);
     }
 
-    public function setLEDs(JeerhasspyAssistant $_assistant, $state)
+    protected function setLEDs(JeerhasspyAssistant $_assistant, $state)
     {
         RhasspyRequestsUtils::setLEDs($_assistant, $state);
     }
 
-    public function setVolume(JeerhasspyAssistant $_assistant, $options)
+    protected function setVolume(JeerhasspyAssistant $_assistant, $options)
     {
         RhasspyRequestsUtils::setVolume($_assistant, $options['slider']);
     }
 
-    public function repeatTTS(JeerhasspyAssistant $_assistant)
+    protected function repeatTTS(JeerhasspyAssistant $_assistant)
     {
         RhasspyRequestsUtils::repeatAssistant($_assistant);
     }
