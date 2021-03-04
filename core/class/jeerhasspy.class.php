@@ -28,14 +28,13 @@ class jeerhasspy extends eqLogic
             //intent received:
             if (isset($payload['intent']) && isset($payload['intent']['name'])) {
                 $intentName = $payload['intent']['name'];
-                $payload['site_id'] = explode(',', $payload['site_id'])[0];
-                $assistant = JeerhasspyAssistant::bySiteId($payload['site_id']);
+                $_siteId = explode(',', $payload['site_id'])[0];
+                $assistant = JeerhasspyAssistant::bySiteId($_siteId);
                 if($assistant === null)
                 {
                     JeerhasspyUtils::logger('No assistant matching with site ID : '.$payload['site_id']);
                     return;
                 }
-                $payload['eqName'] = $assistant->getName();
 
                 if ($intentName != '') {
                     JeerhasspyUtils::logger('--Intent Recognized: ' . $payload['text'] . ' --> ' . json_encode($payload['intent']));
@@ -43,7 +42,10 @@ class jeerhasspy extends eqLogic
                     $askAnswerIntentName = JeerhasspyUtils::getAskAnswerIntentNameOrDefault();
                     if ($interactionsIntentName === $intentName) {
                         JeerhasspyUtils::logger('--Send query to interact engine!');
-                        $reply = interactQuery::tryToReply($payload['text'], $payload);
+                        $_text = $payload['text'];
+                        $tags = ['profile' => $assistant->getName(), 'siteId' => $_siteId, 'plugin' => jeerhasspy_id, 'text' => $_text];
+
+                        $reply = interactQuery::tryToReply($_text, $tags);
                         if (trim($reply['reply']) != '') {
                             $_answerToRhasspy['speech']['text'] = $reply['reply'];
                         }
@@ -140,11 +142,7 @@ class jeerhasspyCmd extends cmd
 
     protected function ask(JeerhasspyAssistant $_assistant, $options)
     {
-        $answer_entity = $options['answer'][0];
-        $answer_variable = $options['variable'];
         RhasspyRequestsUtils::textToSpeech($_assistant, $options);
-
-        $options['askData'] = $answer_entity . '::' . $answer_variable;
         RhasspyRequestsUtils::speakToAsk($_assistant, $options);
     }
 

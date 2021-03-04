@@ -148,7 +148,10 @@ class RhasspyRequestsUtils
             return $result->setError('{{Impossible de parser les options}}');
         }
 
-        $url = $_assistant->getUri().rhasspy_api_listenCommand.'?entity=askData&value='.$_options['askData'];
+        $answerEntity = $_options['answer'][0];
+        $answerVariable = $_options['variable'];
+        $askData = $answerEntity . '::' . $answerVariable;
+        $url = $_assistant->getUri().rhasspy_api_listenCommand.'?entity=askData&value='.$askData;
         $result = self::_request('POST', $url);
         if (!$result->isSuccess()) {
             return $result;
@@ -158,11 +161,7 @@ class RhasspyRequestsUtils
         $payload = json_decode($result->getResult(), true);
         JeerhasspyUtils::logger($payload);
 
-        $data = explode('::', $_options['askData']);
-        $answerEntity = $data[0];
-        $answerVariable = $data[1];
         $answer = false;
-
         $intentName = $payload['intent']['name'];
         if ($intentName != '') {
             if (isset($payload['entities'])) {
