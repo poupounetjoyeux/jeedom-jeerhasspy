@@ -45,9 +45,10 @@ class jeerhasspy extends eqLogic
                         $_text = $payload['text'];
                         $tags = ['profile' => $assistant->getName(), 'siteId' => $_siteId, 'plugin' => jeerhasspy_id, 'text' => $_text];
 
-                        $reply = interactQuery::tryToReply($_text, $tags);
-                        if (trim($reply['reply']) != '') {
-                            $_answerToRhasspy['speech']['text'] = $reply['reply'];
+                        $reply = trim(interactQuery::tryToReply($_text, $tags)['reply']);
+                        if ($reply !== '') {
+                            $_answerToRhasspy['speech']['text'] = $reply;
+                            RhasspyRequestsUtils::textToSpeech($assistant, ['message' => $reply]);
                         }
                     } else if($askAnswerIntentName === $intentName) {
                         JeerhasspyUtils::logger('--Ask answer intent, let ask request handle the answer');
@@ -55,7 +56,6 @@ class jeerhasspy extends eqLogic
                 } else {
                     JeerhasspyUtils::logger('--Unrecognized payload.');
                 }
-
                 //always answer to rhasspy:
                 header('Content-Type: application/json');
                 echo json_encode($_answerToRhasspy);
