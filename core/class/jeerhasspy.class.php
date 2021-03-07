@@ -48,7 +48,6 @@ class jeerhasspy extends eqLogic
                         $reply = trim(interactQuery::tryToReply($_text, $tags)['reply']);
                         if ($reply !== '') {
                             $_answerToRhasspy['speech']['text'] = $reply;
-                            RhasspyRequestsUtils::textToSpeech($assistant, ['message' => $reply]);
                         }
                     } else if($askAnswerIntentName === $intentName) {
                         JeerhasspyUtils::logger('--Ask answer intent, let ask request handle the answer');
@@ -56,10 +55,13 @@ class jeerhasspy extends eqLogic
                 } else {
                     JeerhasspyUtils::logger('--Unrecognized payload.');
                 }
-                //always answer to rhasspy:
-                header('Content-Type: application/json');
-                echo json_encode($_answerToRhasspy);
             }
+
+            //always answer to rhasspy:
+            $jeerhasspyAnswer = json_encode($_answerToRhasspy);
+            JeerhasspyUtils::logger('Reply: '.$jeerhasspyAnswer);
+            header('Content-Type: application/json');
+            echo $jeerhasspyAnswer;
         }
     }
 
